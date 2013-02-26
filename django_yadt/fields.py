@@ -262,6 +262,9 @@ class YADTClassVariant(object):
 
             yield image
 
+        self.invalidate_all()
+
+    def invalidate_all(self):
         if self.image.field.cachebusting_field:
             field = self.image.field.cachebusting_field
 
