@@ -1,6 +1,5 @@
 import sys
 
-from django.db import models
 from django.core.management.base import BaseCommand, CommandError
 
 from ...utils import get_variant
