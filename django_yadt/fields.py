@@ -8,6 +8,8 @@ from django.utils.crypto import get_random_string
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+IMAGE_VARIANTS = []
+
 class YADTImageField(object):
     def __init__(self, variants=None, cachebust=False, fallback=False):
         self.variants = {}
@@ -82,6 +84,8 @@ class YADTVariantConfig(object):
         self.transform = transform
 
         self.original = original
+
+        IMAGE_VARIANTS.append(self)
 
 class Descriptor(object):
     def __init__(self, field):
