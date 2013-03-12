@@ -1,5 +1,9 @@
+import os
+
 from django.db import models
 from django.core.management.base import CommandError
+
+from .fields import IMAGE_VARIANTS
 
 def get_variant(app_label, model_name, field_name, variant_name):
     model = models.get_model(app_label, model_name)
@@ -28,3 +32,13 @@ def get_variant(app_label, model_name, field_name, variant_name):
             field_name,
             variant_name,
         ))
+
+def get_variant_from_path(path):
+    for variant in IMAGE_VARIANTS:
+        # Append '' so we don't accidentally match a prefix
+        dirname = os.path.join(variant.field.upload_to, variant.name, '')
+
+        if path.startswith(dirname):
+            return variant
+
+    return None
