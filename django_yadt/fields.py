@@ -9,11 +9,12 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 class YADTImageField(object):
-    def __init__(self, variants=None, cachebust=False):
-        self.variants = variants or {}
+    def __init__(self, variants=None, cachebust=False, fallback=False):
+        self.variants = {}
         self.cachebust = cachebust
 
-        for name, config in self.variants.iteritems():
+        variants = variants or {}
+        for name, config in variants.iteritems():
             if name == 'original':
                 raise ValueError("'original' is a reserved variant name")
 
@@ -22,10 +23,22 @@ class YADTImageField(object):
                     "'%s' is not a valid format" % config['format']
                 )
 
-        self.variants['original'] = {
-            'format': 'jpeg',
-            'original': True,
-        }
+            self.variants[name] = YADTVariantConfig(
+                self,
+                name,
+                config['format'],
+                crop=config.get('crop', False),
+                width=config.get('width', None),
+                height=config.get('height', None),
+                transform=config.get('transform', None),
+            )
+
+        self.variants['original'] = YADTVariantConfig(
+            self,
+            'original',
+            'jpeg',
+            original=True,
+        )
 
     def contribute_to_class(self, cls, name):
         self.model = cls
@@ -56,6 +69,19 @@ class YADTImageField(object):
         cls._meta.add_virtual_field(self)
 
         setattr(cls, name, Descriptor(self))
+
+class YADTVariantConfig(object):
+    def __init__(self, field, name, format, width=None, height=None, crop=False, fallback=None, transform=None, original=False):
+        self.field = field
+        self.name = name
+
+        self.crop = crop
+        self.width = width
+        self.height = height
+        self.format = format
+        self.transform = transform
+
+        self.original = original
 
 class Descriptor(object):
     def __init__(self, field):
@@ -93,7 +119,7 @@ class YADTImage(object):
 
     def refresh(self):
         for variant in self.variants.values():
-            if not variant.config.get('original', False):
+            if not variant.config.original:
                 variant.refresh()
 
     def cachebust(self):
@@ -114,7 +140,7 @@ class YADTImageFile(object):
         self.filename = os.path.join(
             self.image.field.upload_to,
             self.name,
-            '%d.%s' % (self.instance.pk, self.config['format']),
+            '%d.%s' % (self.instance.pk, self.config.format),
         )
 
     def __repr__(self):
@@ -146,7 +172,7 @@ class YADTImageFile(object):
         assert filename == self.filename, \
             "Image was not stored at the location we wanted"
 
-        if self.config.get('original', False):
+        if self.config.original:
             self.image.refresh()
 
         self.image.cachebust()
@@ -155,19 +181,19 @@ class YADTImageFile(object):
         return default_storage.open(self.filename)
 
     def refresh(self):
-        if self.config.get('original', False):
+        if self.config.original:
             raise NotImplementedError("Cannot refresh the original image")
 
         im = Image.open(self.image.original.open())
 
         im = im.convert('RGB')
 
-        if 'width' in self.config and 'height' in self.config:
-            if self.config.get('crop', False):
+        if self.config.width and self.config.height:
+            if self.config.crop:
                 src_width, src_height = im.size
 
                 src_ratio = float(src_width) / float(src_height)
-                dst_ratio = float(self.config['width']) / float(self.config['height'])
+                dst_ratio = float(self.config.width) / float(self.config.height)
 
                 if dst_ratio < src_ratio:
                     crop_height = src_height
@@ -188,16 +214,16 @@ class YADTImageFile(object):
                 )
 
                 im = im.resize(
-                    (self.config['width'], self.config['height']),
+                    (self.config.width, self.config.height),
                     Image.ANTIALIAS,
                 )
             else:
                 im.thumbnail(
-                    (self.config['width'], self.config['height']),
+                    (self.config.width, self.config.height),
                     Image.ANTIALIAS,
                 )
 
-            if self.config.get('transform') == 'circle':
+            if self.config.transform == 'circle':
                 # Supersample the mask to avoid aliasing
                 mask_size = (im.size[0] * 10, im.size[1] * 10)
 
@@ -213,7 +239,7 @@ class YADTImageFile(object):
                 im.paste(existing, mask=existing.split()[3])
 
         fileobj = StringIO.StringIO()
-        im.save(fileobj, self.config['format'])
+        im.save(fileobj, self.config.format)
 
         self.save(InMemoryUploadedFile(
             fileobj,
@@ -251,7 +277,7 @@ class YADTClassVariant(object):
         self.config = config
 
     def refresh_all(self, generator=False):
-        if self.config.get('original', False):
+        if self.config.original:
             raise NotImplementedError("Cannot refresh the original image")
 
         for instance in self.image.field.model.objects.all():
