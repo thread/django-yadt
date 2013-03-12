@@ -32,6 +32,7 @@ class YADTImageField(object):
                 crop=config.get('crop', False),
                 width=config.get('width', None),
                 height=config.get('height', None),
+                fallback=config.get('fallback', False),
                 transform=config.get('transform', None),
             )
 
@@ -82,10 +83,21 @@ class YADTVariantConfig(object):
         self.height = height
         self.format = format
         self.transform = transform
+        self.fallback = fallback
 
         self.original = original
 
         IMAGE_VARIANTS.append(self)
+
+    def fallback_filename(self):
+        return os.path.join(
+            '%s.%s' % (
+                self.field.model._meta.app_label,
+                self.field.model._meta.object_name,
+            ),
+            self.field.name,
+            '%s.%s' % (self.name, self.format),
+        )
 
 class Descriptor(object):
     def __init__(self, field):
