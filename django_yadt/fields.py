@@ -41,6 +41,7 @@ class YADTImageField(object):
             'original',
             'jpeg',
             original=True,
+            fallback=fallback,
         )
 
     def contribute_to_class(self, cls, name):
