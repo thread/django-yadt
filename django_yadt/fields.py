@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 IMAGE_VARIANTS = []
 
 class YADTImageField(object):
-    def __init__(self, variants=None, cachebust=False, fallback=False):
+    def __init__(self, variants=None, cachebust=False, fallback=False, format='jpeg'):
         self.variants = {}
         self.cachebust = cachebust
 
@@ -39,7 +39,7 @@ class YADTImageField(object):
         self.variants['original'] = YADTVariantConfig(
             self,
             'original',
-            'jpeg',
+            format=format,
             original=True,
             fallback=fallback,
         )
