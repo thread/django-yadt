@@ -32,6 +32,7 @@ class YADTImageField(object):
                 crop=config.get('crop', False),
                 width=config.get('width', None),
                 height=config.get('height', None),
+                kwargs=config.get('kwargs', None),
                 fallback=config.get('fallback', False),
                 transform=config.get('transform', None),
             )
@@ -75,13 +76,14 @@ class YADTImageField(object):
         setattr(cls, name, Descriptor(self))
 
 class YADTVariantConfig(object):
-    def __init__(self, field, name, format, width=None, height=None, crop=False, fallback=None, transform=None, original=False):
+    def __init__(self, field, name, format, width=None, height=None, kwargs=None, crop=False, fallback=None, transform=None, original=False):
         self.field = field
         self.name = name
 
         self.crop = crop
         self.width = width
         self.height = height
+        self.kwargs = kwargs or {}
         self.format = format
         self.transform = transform
         self.fallback = fallback
@@ -256,7 +258,7 @@ class YADTImageFile(object):
                 im.paste(existing, mask=existing.split()[3])
 
         fileobj = StringIO.StringIO()
-        im.save(fileobj, self.config.format)
+        im.save(fileobj, self.config.format, **self.config.kwargs)
 
         self.save(InMemoryUploadedFile(
             fileobj,
