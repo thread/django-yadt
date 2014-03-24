@@ -11,9 +11,10 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 IMAGE_VARIANTS = []
 
 class YADTImageField(object):
-    def __init__(self, variants=None, cachebust=False, fallback=False, format='jpeg'):
+    def __init__(self, variants=None, cachebust=False, fallback=False, format='jpeg', filename_prefix=lambda x: x.pk):
         self.variants = {}
         self.cachebust = cachebust
+        self.filename_prefix = filename_prefix
 
         variants = variants or {}
         for name, config in variants.iteritems():
@@ -159,7 +160,10 @@ class YADTImageFile(object):
         self.filename = os.path.join(
             self.image.field.upload_to,
             self.name,
-            '%d.%s' % (self.instance.pk, self.config.format),
+            '%s.%s' % (
+                self.image.field.filename_prefix(self.instance),
+                self.config.format,
+            ),
         )
 
     def __repr__(self):
