@@ -150,6 +150,10 @@ class YADTImage(object):
                 get_random_string(self.field.cachebusting_field.max_length),
             )
 
+    def delete(self):
+        for variant in self.variants.values():
+            variant.delete()
+
 class YADTImageFile(object):
     def __init__(self, name, config, image, instance):
         self.name = name
@@ -188,7 +192,7 @@ class YADTImageFile(object):
         return default_storage.exists(self.filename)
 
     def save(self, content):
-        default_storage.delete(self.filename)
+        self.delete()
 
         filename = default_storage.save(self.filename, content)
 
@@ -202,6 +206,9 @@ class YADTImageFile(object):
 
     def open(self, mode='rb'):
         return default_storage.open(self.filename)
+
+    def delete(self):
+        return default_storage.delete(self.filename)
 
     def refresh(self):
         if self.config.original:
