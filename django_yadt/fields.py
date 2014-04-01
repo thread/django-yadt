@@ -153,6 +153,7 @@ class YADTImage(object):
     def delete(self):
         for variant in self.variants.values():
             variant.delete()
+        self.cachebust()
 
 class YADTImageFile(object):
     def __init__(self, name, config, image, instance):
