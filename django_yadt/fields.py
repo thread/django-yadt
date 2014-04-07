@@ -67,10 +67,7 @@ class YADTImageField(object):
                 blank=True,
             )
 
-            cls.add_to_class(
-                '%s_hash' % name,
-                self.cachebusting_field,
-            )
+            cls.add_to_class('%s_hash' % name, self.cachebusting_field)
 
         cls._meta.add_virtual_field(self)
 
