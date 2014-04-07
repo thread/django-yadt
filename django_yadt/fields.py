@@ -123,7 +123,7 @@ class YADTImage(object):
         self.__dict__.update(self.variants)
 
         # Convenience methods
-        for x in ('url', 'open', 'exists'):
+        for x in ('url', 'open'):
             setattr(self, x, getattr(self.original, x))
 
     def __repr__(self):
@@ -136,6 +136,9 @@ class YADTImage(object):
 
     def save(self, *args, **kwargs):
         return self.original.save(*args, **kwargs)
+
+    def exists(self):
+        return self.original.exists()
 
     def refresh(self):
         for variant in self.variants.values():
