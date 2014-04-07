@@ -185,7 +185,11 @@ class YADTImageFile(object):
             )
 
             if suffix:
-                url += '?%s' % suffix
+                # If URL already has a querystring, append an anonymous param.
+                if '?' in url:
+                    url += '&_=%s' % suffix
+                else:
+                    url += '?%s' % suffix
 
         return url
 
