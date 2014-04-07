@@ -123,7 +123,7 @@ class YADTImage(object):
         self.__dict__.update(self.variants)
 
         # Convenience methods
-        for x in ('url', 'save', 'open', 'exists'):
+        for x in ('url', 'open', 'exists'):
             setattr(self, x, getattr(self.original, x))
 
     def __repr__(self):
@@ -133,6 +133,9 @@ class YADTImage(object):
             self.field.name,
             self.field.upload_to,
         )
+
+    def save(self, *args, **kwargs):
+        return self.original.save(*args, **kwargs)
 
     def refresh(self):
         for variant in self.variants.values():
