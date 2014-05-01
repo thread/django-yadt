@@ -337,7 +337,7 @@ class YADTClassVariant(object):
         if self.config.original:
             raise NotImplementedError("Cannot refresh the original image")
 
-        for instance in self.image.field.model.objects.all():
+        for instance in self.image.field.model.objects.order_by():
             image = getattr(instance, self.image.field.name)
 
             if image.original.exists():
