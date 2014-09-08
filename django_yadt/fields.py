@@ -267,8 +267,8 @@ class YADTImageFile(object):
                     x_offset,
                     y_offset,
                     x_offset + int(crop_width),
-                    y_offset + int(crop_height))
-                )
+                    y_offset + int(crop_height),
+                ))
 
                 im = im.resize(
                     (self.config.width, self.config.height),
