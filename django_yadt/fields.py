@@ -8,6 +8,8 @@ from django.utils.crypto import get_random_string
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+from .utils import from_dotted_path
+
 IMAGE_VARIANTS = []
 
 class YADTImageField(object):
@@ -31,12 +33,9 @@ class YADTImageField(object):
                 self,
                 name,
                 config['format'],
-                crop=config.get('crop', False),
-                width=config.get('width', None),
-                height=config.get('height', None),
                 kwargs=config.get('kwargs', None),
+                pipeline=config.get('pipeline', ()),
                 fallback=config.get('fallback', False),
-                transform=config.get('transform', None),
             )
 
         self.variants['original'] = YADTVariantConfig(
@@ -82,19 +81,24 @@ class YADTImageField(object):
         setattr(cls, name, Descriptor(self))
 
 class YADTVariantConfig(object):
-    def __init__(self, field, name, format, width=None, height=None, kwargs=None, crop=False, fallback=None, transform=None, original=False):
+    def __init__(self, field, name, format, kwargs=None, fallback=None, original=False, pipeline=()):
         self.field = field
         self.name = name
 
-        self.crop = crop
-        self.width = width
-        self.height = height
         self.kwargs = kwargs or {}
         self.format = format
-        self.transform = transform
         self.fallback = fallback
-
         self.original = original
+        self.pipeline = pipeline
+
+        for x in self.pipeline:
+            name = x['name']
+
+            # Allow fields to not require cumbersome prefix in most cases
+            if '.' not in name:
+                name = 'django_yadt.processors.%s' % x['name']
+
+            x['fn'] = from_dotted_path(name)
 
         IMAGE_VARIANTS.append(self)
 
@@ -245,55 +249,9 @@ class YADTImageFile(object):
 
         im = im.convert('RGB')
 
-        if self.config.width and self.config.height:
-            if self.config.crop:
-                src_width, src_height = im.size
-
-                src_ratio = float(src_width) / float(src_height)
-                dst_ratio = float(self.config.width) / float(self.config.height)
-
-                if dst_ratio < src_ratio:
-                    crop_height = src_height
-                    crop_width = crop_height * dst_ratio
-                    x_offset = int(float(src_width - crop_width) / 2)
-                    y_offset = 0
-                else:
-                    crop_width = src_width
-                    crop_height = crop_width / dst_ratio
-                    x_offset = 0
-                    y_offset = int(float(src_height - crop_height) / 3)
-
-                im = im.crop((
-                    x_offset,
-                    y_offset,
-                    x_offset + int(crop_width),
-                    y_offset + int(crop_height),
-                ))
-
-                im = im.resize(
-                    (self.config.width, self.config.height),
-                    Image.ANTIALIAS,
-                )
-            else:
-                im.thumbnail(
-                    (self.config.width, self.config.height),
-                    Image.ANTIALIAS,
-                )
-
-            if self.config.transform == 'circle':
-                # Supersample the mask to avoid aliasing
-                mask_size = (im.size[0] * 10, im.size[1] * 10)
-
-                # Create circular mask
-                mask = Image.new('L', mask_size, 0)
-                ImageDraw.Draw(mask).ellipse((0, 0) + mask_size, fill=255)
-                mask.thumbnail(im.size, Image.ANTIALIAS)
-
-                # Need a new white background to paste it on
-                existing = im
-                existing.putalpha(mask)
-                im = Image.new('RGBA', existing.size, (255, 255, 255, 0))
-                im.paste(existing, mask=existing.split()[3])
+        # Apply processing pipeline
+        for x in self.config.pipeline:
+            im = x['fn'](im, x)
 
         fileobj = StringIO.StringIO()
         im.save(fileobj, self.config.format, **self.config.kwargs)
