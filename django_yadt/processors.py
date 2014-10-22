@@ -2,6 +2,10 @@ import Image
 import ImageDraw
 
 def crop(im, config):
+    """
+    Resize and crop to the specified dimensions, regardless of source size.
+    """
+
     src_width, src_height = im.size
 
     src_ratio = float(src_width) / float(src_height)
@@ -31,6 +35,10 @@ def crop(im, config):
     )
 
 def thumbnail(im, config):
+    """
+    Create a thumbnail "no larger than the given size", ie. without upsizing.
+    """
+
     im.thumbnail(
         (config['width'], config['height']),
         Image.ANTIALIAS,
@@ -39,6 +47,10 @@ def thumbnail(im, config):
     return im
 
 def circle(im, config):
+    """
+    Apply a circular mask to emulate "border-radius: 50%;" in CSS.
+    """
+
     # Supersample the mask to avoid aliasing
     mask_size = (im.size[0] * 10, im.size[1] * 10)
 
