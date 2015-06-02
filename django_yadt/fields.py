@@ -1,5 +1,6 @@
 import os
 import Image
+import django
 import StringIO
 import ImageDraw
 
@@ -76,7 +77,10 @@ class YADTImageField(object):
 
             cls.add_to_class('%s_exists' % name, self.exists_field)
 
-        cls._meta.add_virtual_field(self)
+        if django.VERSION >= (1, 8):
+            cls._meta.add_field(self, virtual=True)
+        else:
+            cls._meta.add_virtual_field(self)
 
         setattr(cls, name, Descriptor(self))
 
