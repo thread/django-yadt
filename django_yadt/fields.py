@@ -13,6 +13,8 @@ from .utils import from_dotted_path
 IMAGE_VARIANTS = []
 
 class YADTImageField(object):
+    is_relation = False
+
     def __init__(self, variants=None, cachebust=False, track_exists=False, fallback=False, format='jpeg', filename_prefix=lambda x: x.pk):
         self.variants = {}
         self.cachebust = cachebust
