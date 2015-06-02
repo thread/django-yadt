@@ -1,5 +1,4 @@
-import Image
-import ImageDraw
+from PIL import Image, ImageDraw
 
 def crop(im, config):
     """

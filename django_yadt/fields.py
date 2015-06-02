@@ -1,8 +1,8 @@
 import os
-import Image
 import django
 import StringIO
 
+from PIL import Image
 from django.db import models
 from django.utils.crypto import get_random_string
 from django.core.files.storage import default_storage
