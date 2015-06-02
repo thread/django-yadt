@@ -50,8 +50,9 @@ class YADTImageField(fields.Field):
         )
 
     def contribute_to_class(self, cls, name):
-        self.model = cls
-        self.name = name
+        super(YADTImageField, self).contribute_to_class(
+            cls, name, virtual_only=True,
+        )
 
         self.cachebusting_field = None
         self.exists_field = None
@@ -78,11 +79,6 @@ class YADTImageField(fields.Field):
             self.exists_field = models.BooleanField(default=False)
 
             cls.add_to_class('%s_exists' % name, self.exists_field)
-
-        if django.VERSION >= (1, 8):
-            cls._meta.add_field(self, virtual=True)
-        else:
-            cls._meta.add_virtual_field(self)
 
         setattr(cls, name, Descriptor(self))
 
