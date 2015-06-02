@@ -4,6 +4,7 @@ import StringIO
 
 from PIL import Image
 from django.db import models
+from django.db.models import fields
 from django.utils.crypto import get_random_string
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -12,10 +13,10 @@ from .utils import from_dotted_path
 
 IMAGE_VARIANTS = []
 
-class YADTImageField(object):
-    is_relation = False
-
+class YADTImageField(fields.Field):
     def __init__(self, variants=None, cachebust=False, track_exists=False, fallback=False, format='jpeg', filename_prefix=lambda x: x.pk):
+        super(YADTImageField, self).__init__()
+
         self.variants = {}
         self.cachebust = cachebust
         self.track_exists = track_exists
