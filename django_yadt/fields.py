@@ -2,7 +2,6 @@ import os
 import Image
 import django
 import StringIO
-import ImageDraw
 
 from django.db import models
 from django.utils.crypto import get_random_string
