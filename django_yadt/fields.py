@@ -1,5 +1,4 @@
 import os
-import django
 import StringIO
 
 from PIL import Image
