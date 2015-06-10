@@ -14,6 +14,8 @@ from .utils import from_dotted_path
 IMAGE_VARIANTS = []
 
 class YADTImageField(fields.Field):
+    concrete = False
+
     def __init__(self, variants=None, cachebust=False, track_exists=False, fallback=False, format='jpeg', filename_prefix=lambda x: x.pk):
         super(YADTImageField, self).__init__()
 
@@ -50,10 +52,18 @@ class YADTImageField(fields.Field):
         )
 
     def contribute_to_class(self, cls, name):
-        super(YADTImageField, self).contribute_to_class(
-            cls, name, virtual_only=True,
-        )
+        # Set up this field...
+        self.attname = name
+        self.name = name
+        self.model = cls
+        self.column = None
 
+        setattr(cls, name, Descriptor(self))
+
+        cls._meta.add_field(self)
+        cls._meta.virtual_fields.append(self)
+
+        # Now set up several other management fields
         self.cachebusting_field = None
         self.exists_field = None
 
@@ -80,7 +90,8 @@ class YADTImageField(fields.Field):
 
             cls.add_to_class('%s_exists' % name, self.exists_field)
 
-        setattr(cls, name, Descriptor(self))
+    def db_type(self, connection):
+        return None
 
 class YADTVariantConfig(object):
     def __init__(self, field, name, format, kwargs=None, fallback=None, original=False, pipeline=()):
