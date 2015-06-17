@@ -59,7 +59,6 @@ class YADTImageField(fields.Field):
 
         setattr(cls, name, Descriptor(self))
 
-        cls._meta.add_field(self)
         cls._meta.virtual_fields.append(self)
 
         # Now set up several other management fields
