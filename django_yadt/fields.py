@@ -258,7 +258,12 @@ class YADTImageFile(object):
 
         im = Image.open(self.image.original.open())
 
-        im = im.convert('RGB')
+        if im.format == 'PNG':
+            original_im = im.copy()
+            im = Image.new('RGBA', original_im.size, (255, 255, 255, 255))
+            im.paste(original_im, (0, 0), original_im)
+        else:
+            im = im.convert('RGB')
 
         # Apply processing pipeline
         for x in self.config.pipeline:
