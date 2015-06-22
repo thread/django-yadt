@@ -260,6 +260,7 @@ class YADTImageFile(object):
 
         if im.format == 'PNG':
             original_im = im.copy()
+            original_im = original_im.convert('RGBA')
             im = Image.new('RGBA', original_im.size, (255, 255, 255, 255))
             im.paste(original_im, (0, 0), original_im)
         else:
