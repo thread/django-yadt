@@ -199,11 +199,16 @@ class YADTImageFile(object):
         self.config = config
         self.instance = instance
 
+        filename_prefix = self.image.field.filename_prefix(self.instance)
+
+        if filename_prefix is None:
+            raise ValueError("Constructing image with a None prefix, is this an unsaved model?")
+
         self.filename = os.path.join(
             self.image.field.upload_to,
             self.name,
             '%s.%s' % (
-                self.image.field.filename_prefix(self.instance),
+                filename_prefix,
                 self.config.format,
             ),
         )
