@@ -147,7 +147,12 @@ class YADTImage(object):
         image_file_class = image_file_class or YADTImageFile
 
         for name, config in self.field.variants.iteritems():
-            self.variants[name] = image_file_class(name, config, self, instance)
+            self.variants[name] = image_file_class(
+                name,
+                config,
+                self,
+                instance,
+            )
         self.__dict__.update(self.variants)
 
         # Convenience methods
