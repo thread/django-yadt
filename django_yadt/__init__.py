@@ -1,1 +1,1 @@
-from .fields import YADTImageField
+from .fields import YADTImageField, HMACYADTImageField

@@ -7,6 +7,7 @@ from django.db.models import fields
 from django.utils.crypto import get_random_string
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.signing import Signer
 
 from .utils import from_dotted_path
 
@@ -348,3 +349,8 @@ class YADTClassVariant(object):
                 get_random_string(self.field.cachebusting_field.max_length),
             )
 
+class HMACYADTImageField(YADTImageField):
+    def __init__(self, *args, **kwargs):
+        kwargs['filename_prefix'] = lambda x: Signer().sign(x.pk)
+
+        super(HMACYADTImageField, self).__init__(*args, **kwargs)
