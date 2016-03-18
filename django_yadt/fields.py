@@ -15,13 +15,15 @@ IMAGE_VARIANTS = []
 class YADTImageField(fields.Field):
     concrete = False
 
-    def __init__(self, variants=None, cachebust=False, track_exists=False, fallback=False, format='jpeg', filename_prefix=lambda x: x.pk):
+    def __init__(self, variants=None, cachebust=False, track_exists=False, fallback=False, format='jpeg', filename_prefix=lambda x: x.pk, image_class=None):
         super(YADTImageField, self).__init__()
 
         self.variants = {}
         self.cachebust = cachebust
         self.track_exists = track_exists
         self.filename_prefix = filename_prefix
+
+        self.image_class = image_class or YADTImage
 
         variants = variants or {}
         for name, config in variants.iteritems():
@@ -57,7 +59,7 @@ class YADTImageField(fields.Field):
         self.model = cls
         self.column = None
 
-        setattr(cls, name, Descriptor(self))
+        setattr(cls, name, Descriptor(self, self.image_class))
 
         cls._meta.add_field(self, virtual=True)
 
@@ -124,25 +126,28 @@ class YADTVariantConfig(object):
         )
 
 class Descriptor(object):
-    def __init__(self, field):
+    def __init__(self, field, image_class):
         self.field = field
+        self.image_class = image_class
 
     def __get__(self, instance=None, owner=None):
         if instance is None:
             return YADTClassImage(self.field)
 
-        return YADTImage(self.field, instance)
+        return self.image_class(self.field, instance)
 
 ##
 
 class YADTImage(object):
-    def __init__(self, field, instance):
+    def __init__(self, field, instance, image_file_class=None):
         self.field = field
         self.instance = instance
         self.variants = {}
 
+        image_file_class = image_file_class or YADTImageFile
+
         for name, config in self.field.variants.iteritems():
-            self.variants[name] = YADTImageFile(name, config, self, instance)
+            self.variants[name] = image_file_class(name, config, self, instance)
         self.__dict__.update(self.variants)
 
         # Convenience methods
