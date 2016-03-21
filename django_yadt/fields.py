@@ -252,8 +252,13 @@ class YADTImageFile(object):
 
         filename = default_storage.save(self.filename, content)
 
-        assert filename == self.filename, "Image was not stored at the " \
-            "location we wanted (%r vs %r)" % (filename, self.filename)
+        if filename != self.filename:
+            raise RuntimeError(
+                "Image was not stored at the location we wanted (%r vs %r)" % (
+                    filename,
+                    self.filename,
+                )
+            )
 
         if self.config.original:
             self.image.refresh()
