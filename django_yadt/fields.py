@@ -53,6 +53,16 @@ class YADTImageField(fields.Field):
             fallback=fallback,
         )
 
+    def get_upload_to(self):
+        return os.path.join(
+            'yadt',
+            '%s.%s' % (
+                self.model._meta.app_label,
+                self.model._meta.object_name,
+            ),
+            self.name,
+        )
+
     def contribute_to_class(self, cls, name):
         # Set up this field...
         self.attname = name
@@ -68,14 +78,7 @@ class YADTImageField(fields.Field):
         self.cachebusting_field = None
         self.exists_field = None
 
-        self.upload_to = os.path.join(
-            'yadt',
-            '%s.%s' % (
-                self.model._meta.app_label,
-                self.model._meta.object_name,
-            ),
-            self.name,
-        )
+        self.upload_to = self.get_upload_to()
 
         if self.cachebust:
             self.cachebusting_field = models.CharField(
