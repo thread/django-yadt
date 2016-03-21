@@ -354,7 +354,10 @@ class YADTClassVariant(object):
 
 class HMACYADTImageField(YADTImageField):
     def __init__(self, salt='django_yadt.fields.HMACYADTImageField', *args, **kwargs):
-        kwargs['filename_prefix'] = lambda x: Signer(salt=salt).sign(x.pk)
+        kwargs['filename_prefix'] = lambda x: Signer(
+            salt=salt,
+            sep='_',
+        ).sign(x.pk)
 
         super(HMACYADTImageField, self).__init__(*args, **kwargs)
 
