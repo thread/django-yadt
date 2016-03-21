@@ -357,3 +357,13 @@ class HMACYADTImageField(YADTImageField):
         kwargs['filename_prefix'] = lambda x: Signer(salt=salt).sign(x.pk)
 
         super(HMACYADTImageField, self).__init__(*args, **kwargs)
+
+    def get_upload_to(self):
+        return os.path.join(
+            'hmacyadt',
+            '%s.%s' % (
+                self.model._meta.app_label,
+                self.model._meta.object_name,
+            ),
+            self.name,
+        )
