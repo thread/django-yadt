@@ -1,10 +1,10 @@
 import os
 
-from django.db import models
+from django.apps import apps
 from django.core.management.base import CommandError
 
 def get_variant(app_label, model_name, field_name, variant_name):
-    model = models.get_model(app_label, model_name)
+    model = apps.get_model(app_label, model_name)
 
     if model is None:
         raise CommandError("%s.%s is not a valid model name" % (

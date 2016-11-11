@@ -4,16 +4,21 @@ from django.core.management.base import BaseCommand, CommandError
 
 from ...utils import get_variant
 
+
 class Command(BaseCommand):
-    USAGE = "<app_label> <model> <field> <variant>"
+    def add_arguments(self, parser):
+        parser.add_argument('app_label', type=str)
+        parser.add_argument('model_name', type=str)
+        parser.add_argument('field_name', type=str)
+        parser.add_argument('variant_name', type=str)
 
     def handle(self, *args, **options):
-        try:
-            app_label, model_name, field_name, variant_name = args
-        except ValueError:
-            raise CommandError(self.USAGE)
-
-        variant = get_variant(app_label, model_name, field_name, variant_name)
+        variant = get_variant(
+            options['app_label'],
+            options['model_name'],
+            options['field_name'],
+            options['variant_name']
+        )
 
         for x in variant.refresh_all(generator=True):
             sys.stderr.write('.')
