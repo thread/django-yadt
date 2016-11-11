@@ -17,7 +17,7 @@ class Command(BaseCommand):
             options['app_label'],
             options['model_name'],
             options['field_name'],
-            options['variant_name']
+            options['variant_name'],
         )
 
         for x in variant.refresh_all(generator=True):
