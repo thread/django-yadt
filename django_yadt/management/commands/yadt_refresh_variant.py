@@ -7,10 +7,10 @@ from ...utils import get_variant
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('app_label', type=str)
-        parser.add_argument('model_name', type=str)
-        parser.add_argument('field_name', type=str)
-        parser.add_argument('variant_name', type=str)
+        parser.add_argument('app_label')
+        parser.add_argument('model_name')
+        parser.add_argument('field_name')
+        parser.add_argument('variant_name')
 
     def handle(self, *args, **options):
         variant = get_variant(
