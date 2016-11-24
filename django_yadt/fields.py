@@ -1,5 +1,5 @@
+import io
 import os
-import StringIO
 
 from PIL import Image
 from django.db import models
@@ -289,7 +289,7 @@ class YADTImageFile(object):
         for x in self.config.pipeline:
             im = x['fn'](im, x)
 
-        fileobj = StringIO.StringIO()
+        fileobj = io.BytesIO()
         im.save(fileobj, self.config.format, **self.config.kwargs)
 
         self.save(InMemoryUploadedFile(
@@ -297,7 +297,7 @@ class YADTImageFile(object):
             None,
             self.filename,
             'application/octet-stream',
-            fileobj.len,
+            len(fileobj.getvalue()),
             None,
         ))
 
