@@ -35,8 +35,8 @@ class Command(NoArgsCommand):
         if not variant.fallback:
             return
 
-        print TEMPLATE.strip() % dict(
+        print(TEMPLATE.strip() % dict(
             source=os.path.join(variant.field.upload_to, variant.name),
             target=variant.fallback_filename(),
             **options
-        )
+        ))

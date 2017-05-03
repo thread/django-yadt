@@ -35,4 +35,4 @@ class Command(BaseCommand):
         )
 
         for x in on_disk.difference(in_database):
-            print "I: Can be deleted: %s" % x
+            print("I: Can be deleted: %s" % x)
