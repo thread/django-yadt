@@ -289,6 +289,10 @@ class YADTImageFile(object):
         for x in self.config.pipeline:
             im = x['fn'](im, x)
 
+        if self.config.format != 'png':
+            # Explicitly remove the alpha channel
+            im = im.convert('RGB')
+
         fileobj = io.BytesIO()
         im.save(fileobj, self.config.format, **self.config.kwargs)
 
