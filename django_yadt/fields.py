@@ -72,7 +72,7 @@ class YADTImageField(fields.Field):
 
         setattr(cls, name, Descriptor(self, self.image_class))
 
-        cls._meta.add_field(self, virtual=True)
+        cls._meta.add_field(self, private=True)
 
         # Now set up several other management fields
         self.cachebusting_field = None
