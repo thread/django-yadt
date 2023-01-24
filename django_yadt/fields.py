@@ -9,6 +9,7 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.signing import Signer
 
+from .app_settings import DJANGO_YADT_CACHEBUST_QUERY_PARAMETER_KEY
 from .utils import from_dotted_path
 
 IMAGE_VARIANTS = []
@@ -236,11 +237,10 @@ class YADTImageFile(object):
             )
 
             if suffix:
-                # If URL already has a querystring, append an anonymous param.
                 if '?' in url:
-                    url += '&_=%s' % suffix
+                    url += '&%s=%s' % (DJANGO_YADT_CACHEBUST_QUERY_PARAMETER_KEY, suffix)
                 else:
-                    url += '?%s' % suffix
+                    url += '?%s=%s' % (DJANGO_YADT_CACHEBUST_QUERY_PARAMETER_KEY, suffix)
 
         return url
 
