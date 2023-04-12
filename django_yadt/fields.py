@@ -88,12 +88,24 @@ class YADTImageField(fields.Field):
                 blank=True,
             )
 
-            cls.add_to_class('%s_hash' % name, self.cachebusting_field)
+            # Set up the cachebusting field
+            self.cachebusting_field.attname = f'{name}_hash'
+            self.cachebusting_field.name = self.cachebusting_field.attname
+            self.cachebusting_field.model = cls
+            self.cachebusting_field.column = None
+
+            cls._meta.add_field(self.cachebusting_field, private=True)
 
         if self.track_exists:
             self.exists_field = models.BooleanField(default=False)
 
-            cls.add_to_class('%s_exists' % name, self.exists_field)
+            # Set up the exists field
+            self.exists_field.attname = f'{name}_exists'
+            self.exists_field.name = self.exists_field.attname
+            self.exists_field.model = cls
+            self.exists_field.column = None
+
+            cls._meta.add_field(self.exists_field, private=True)
 
     def db_type(self, connection):
         return None
