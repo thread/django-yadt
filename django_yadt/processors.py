@@ -1,5 +1,12 @@
 from PIL import Image, ImageDraw
 
+try:
+    # Deprecated in Pillow 9.1.0, removed in 10
+    ANTIALIAS = Image.Resampling.LANCZOS
+except AttributeError:
+    ANTIALIAS = Image.ANTIALIAS
+
+
 def crop(im, config):
     """
     Resize and crop to the specified dimensions, regardless of source size.
@@ -30,7 +37,7 @@ def crop(im, config):
 
     return im.resize(
         (config['width'], config['height']),
-        Image.ANTIALIAS,
+        ANTIALIAS,
     )
 
 def thumbnail(im, config):
@@ -40,7 +47,7 @@ def thumbnail(im, config):
 
     im.thumbnail(
         (config['width'], config['height']),
-        Image.ANTIALIAS,
+        ANTIALIAS,
     )
 
     return im
@@ -56,7 +63,7 @@ def circle(im, config):
     # Create circular mask
     mask = Image.new('L', mask_size, 0)
     ImageDraw.Draw(mask).ellipse((0, 0) + mask_size, fill=255)
-    mask.thumbnail(im.size, Image.ANTIALIAS)
+    mask.thumbnail(im.size, ANTIALIAS)
 
     # Need a new white background to paste it on
     existing = im
