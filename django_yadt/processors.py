@@ -1,9 +1,9 @@
 from PIL import Image, ImageDraw
 
 try:
-    # Deprecated in Pillow 9.1.0, removed in 10
     ANTIALIAS = Image.Resampling.LANCZOS
 except AttributeError:
+    # Deprecated in Pillow 9.1.0, removed in 10
     ANTIALIAS = Image.ANTIALIAS
 
 
