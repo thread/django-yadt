@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import io
 import os
+from collections.abc import Callable
 
 from PIL import Image
 from django.db import models
 from django.db.models import fields
+from django.core.files import File
 from django.utils.crypto import get_random_string
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -144,6 +148,10 @@ class Descriptor(object):
 ##
 
 class YADTImage(object):
+    url: str
+    open: Callable[[], File]
+    original: YADTImageFile  # not quite true as the type can be customised, but likely close enough
+
     def __init__(self, field, instance, image_file_class=None):
         self.field = field
         self.instance = instance
